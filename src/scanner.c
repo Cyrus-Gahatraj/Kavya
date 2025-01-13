@@ -114,7 +114,7 @@ static void skipNonTokens(){
     }
 }
 
-static TokenType identifierType(){
+static TokenType identifierType() {
     switch (scanner.start[0]) {
         case 'a': return checkKeyword(1, 2, "nd", TOKEN_AND);
         case 'c': return checkKeyword(1, 4, "lass", TOKEN_CLASS);
@@ -130,13 +130,17 @@ static TokenType identifierType(){
         case 'i': return checkKeyword(1, 1, "f", TOKEN_IF);
         case 'n': return checkKeyword(1, 3, "ull", TOKEN_NULL);
         case 'o': return checkKeyword(1, 1, "r", TOKEN_OR);
-        case 'p': return checkKeyword(1,6, "urpose", TOKEN_PURPOSE);
+        case 'p': return checkKeyword(1, 6, "urpose", TOKEN_PURPOSE);
         case 'r': return checkKeyword(1, 5, "eturn", TOKEN_RETURN);
         case 's': return checkKeyword(1, 4, "uper", TOKEN_SUPER);
         case 't':
             if (scanner.current - scanner.start > 1) {
                 switch (scanner.start[1]) {
-                    case 'h': return checkKeyword(2, 2, "is", TOKEN_THIS);
+                    case 'h':
+                        if (scanner.current - scanner.start == 3) {
+                            return checkKeyword(2, 1, "e", TOKEN_THE);  
+                        }
+                        return checkKeyword(2, 2, "is", TOKEN_THIS);
                     case 'r': return checkKeyword(2, 2, "ue", TOKEN_TRUE);
                 }
             }
@@ -152,6 +156,7 @@ static TokenType identifierType(){
     }
     return TOKEN_IDENTIFIER;
 }
+
 
 static Token identifier(){
     while(isAlpha(peek()) || isDigit(peek())) advance();
