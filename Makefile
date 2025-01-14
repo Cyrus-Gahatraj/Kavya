@@ -1,5 +1,5 @@
-EXEC = kavya.out
-SOURCES = $(wildcard src/*.c)
+EXEC = kavya.out        
+SOURCES = $(wildcard Src/*.c)
 OBJECTS = $(SOURCES:.c=.o)
 FLAGS = -g
 
@@ -16,11 +16,12 @@ $(EXEC): $(OBJECTS)
 install:
 	@echo "Installing $(EXEC) to /usr/local/bin..."
 	@make
-	@cp ./kavya.out /usr/local/bin/kavya
+	@sudo cp $(EXEC) /usr/local/bin/$(EXEC)
+	@sudo ln -sf /usr/local/bin/$(EXEC) /usr/local/bin/kavya
 
 clean:
 	@echo "Cleaning up..."
-	@-rm -f $(EXEC) *.out src/*.o
+	@-rm -f $(EXEC) *.o ./Src/*.o
 
 run:
 	@./$(EXEC)
