@@ -199,7 +199,7 @@ static uint8_t identifierConstant(Token* name) {
 
 static void namedVariable(Token name, bool canAssign) {
     uint8_t arg = identifierConstant(&name);
-    if (canAssign && match(TOKEN_EQUAL)) {
+    if (canAssign && (match(TOKEN_EQUAL)||match(TOKEN_IS))) {
         expression();
         emitBytes(OP_SET_GLOBAL, arg);
     } else {
@@ -239,6 +239,7 @@ ParseRule rules[] = {
     [TOKEN_BANG] = {unary, NULL, PREC_UNARY},
     [TOKEN_BANG_EQUAL] = {NULL, binary, PREC_EQUALITY},
     [TOKEN_EQUAL] = {NULL, binary, PREC_ASSIGNMENT},
+    [TOKEN_IS] = {NULL, binary, PREC_ASSIGNMENT},
     [TOKEN_EQUAL_EQUAL] = {NULL, binary, PREC_EQUALITY},
     [TOKEN_GREATER] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_GREATER_EQUAL] = {NULL, binary, PREC_COMPARISON},
@@ -287,7 +288,7 @@ static void parsePrecedence(Precedence precedence) {
         }
     }
 
-    if (canAssign && match(TOKEN_EQUAL)) {
+    if (canAssign && (match(TOKEN_EQUAL)||match(TOKEN_IS))) {
         error("Invalid assignment target.");
     }
 }
@@ -312,7 +313,7 @@ static void expression(){
 
 static void theDeclaration() {
     uint8_t global = parseVariable("Expect variable name.");
-    if (match(TOKEN_EQUAL)) {
+    if (match(TOKEN_EQUAL) || match(TOKEN_IS)) {
         expression(); 
     } else {
         emitByte(OP_NULL); 

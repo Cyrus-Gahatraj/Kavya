@@ -1,9 +1,10 @@
-EXEC = kavya.out        
+EXEC = kavya.out
+INSTALL_PATH = /usr/local/bin/kavya
 SOURCES = $(wildcard Src/*.c)
 OBJECTS = $(SOURCES:.c=.o)
 FLAGS = -g
 
-.DEFAULT_GOAL := $(EXEC)
+.DEFAULT_GOAL := install
 
 $(EXEC): $(OBJECTS)
 	@echo "Linking $(EXEC)..."
@@ -13,17 +14,15 @@ $(EXEC): $(OBJECTS)
 	@echo "Compiling $<..."
 	@gcc -c $(FLAGS) $< -o $@
 
-install:
-	@echo "Installing $(EXEC) to /usr/local/bin..."
-	@make
-	@sudo cp $(EXEC) /usr/local/bin/$(EXEC)
-	@sudo ln -sf /usr/local/bin/$(EXEC) /usr/local/bin/kavya
+install: $(EXEC)
+	@echo "Installing/Updating $(EXEC) to $(INSTALL_PATH)"
+	@sudo cp $(EXEC) $(INSTALL_PATH)
 
 clean:
 	@echo "Cleaning up..."
-	@-rm -f $(EXEC) *.o ./Src/*.o
+	@-rm -f $(EXEC) Src/*.o
 
-run:
+run: $(EXEC)
 	@./$(EXEC)
 
 .PHONY: clean install run
