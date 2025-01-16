@@ -193,6 +193,13 @@ static void string(bool canAssign){
                                     parser.previous.length-2)));
 }
 
+static void askExpression(bool canAssign) {
+    consume(TOKEN_STRING, "Expect string after 'ask'.");
+    emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
+    emitByte(OP_ASK);
+}
+
+
 static uint8_t identifierConstant(Token* name) {
     return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
 }
@@ -258,6 +265,7 @@ ParseRule rules[] = {
     [TOKEN_NULL] = {literal, NULL, PREC_PRIMARY},
     [TOKEN_OR] = {NULL, NULL, PREC_NONE},
     [TOKEN_WRITE] = {NULL, NULL, PREC_NONE},
+    [ TOKEN_ASK ] = {askExpression, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
     [TOKEN_THIS] = {NULL, NULL, PREC_NONE},

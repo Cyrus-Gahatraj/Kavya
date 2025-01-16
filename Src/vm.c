@@ -209,6 +209,19 @@ static InterpretResult run() {
                 printf("\n");
                 break;
             }
+            case OP_ASK: {
+                ObjString* message = AS_STRING(pop());
+                printf("%s", message->chars);
+
+                char buffer[256];
+                if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+                    buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline
+                    push(OBJ_VAL(copyString(buffer, strlen(buffer))));
+                } else {
+                    push(OBJ_VAL(copyString("", 0))); // Handle EOF or error
+                }
+                break;
+            }
             case OP_RETURN: {
                 return INTERPRET_OK;
             }

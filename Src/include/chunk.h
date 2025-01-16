@@ -24,6 +24,7 @@ typedef enum {
     OP_NOT,
     OP_NEGATE,
     OP_WRITE,
+    OP_ASK,
     OP_RETURN,
 } OpCode;
 
