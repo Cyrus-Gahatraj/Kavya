@@ -11,11 +11,13 @@
 
 VM vm;
 
-static void resetStack(){
+static void resetStack()
+{
     vm.stackTop = vm.stack;
 }
 
-static void runtimeError(const char* format, ...){
+static void runtimeError(const char *format, ...)
+{
     va_list args;
     va_start(args, format);
     vfprintf(stderr, format, args);
@@ -28,74 +30,88 @@ static void runtimeError(const char* format, ...){
     resetStack();
 }
 
-void initVM(){
+void initVM()
+{
     resetStack();
     vm.objects = NULL;
     initTable(&vm.globals);
     initTable(&vm.strings);
 }
 
-void freeVM(){
+void freeVM()
+{
     freeTable(&vm.globals);
     freeTable(&vm.strings);
     freeObjects();
 }
 
-void push(Value value){
+void push(Value value)
+{
     *vm.stackTop++ = value;
 }
 
-Value pop(){
+Value pop()
+{
     return *--vm.stackTop;
 }
 
-static Value peek(int distance){
-    return vm.stackTop[-1-distance];
+static Value peek(int distance)
+{
+    return vm.stackTop[-1 - distance];
 }
 
-static bool isFalsey(Value value){
+static bool isFalsey(Value value)
+{
     return IS_NULL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
 
-static void concatenate(){
-    ObjString* b = AS_STRING(pop());
-    ObjString* a = AS_STRING(pop());
+static void concatenate()
+{
+    ObjString *b = AS_STRING(pop());
+    ObjString *a = AS_STRING(pop());
 
     int length = a->length + b->length;
-    char* chars = ALLOCATE(char, length + 1);
-    memcpy(chars, a->chars, a->length+1);
+    char *chars = ALLOCATE(char, length + 1);
+    memcpy(chars, a->chars, a->length + 1);
     memcpy(chars + a->length, b->chars, b->length);
     chars[length] = '\0';
-    ObjString* result = takeString(chars, length);
+    ObjString *result = takeString(chars, length);
     push(OBJ_VAL(result));
 }
 
-static inline uint8_t READ_BYTE() {
+static inline uint8_t READ_BYTE()
+{
     return *vm.ip++;
 }
 
-static inline Value READ_CONSTANT() {
+static inline Value READ_CONSTANT()
+{
     return vm.chunk->constants.values[READ_BYTE()];
 }
 
-static InterpretResult run() {
+static InterpretResult run()
+{
 
 #define READ_STRING() AS_STRING(READ_CONSTANT())
-#define BINARY_OP(valueType, op) \
-    do { \
-        if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
-            runtimeError("Operands must be numbers."); \
-            return INTERPRET_RUNTIME_ERROR; \
-        } \
-        double b = AS_NUMBER(pop()); \
-        double a = AS_NUMBER(pop()); \
-        push(valueType(a op b)); \
-    } while(false);
+#define BINARY_OP(valueType, op)                        \
+    do                                                  \
+    {                                                   \
+        if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) \
+        {                                               \
+            runtimeError("Operands must be numbers.");  \
+            return INTERPRET_RUNTIME_ERROR;             \
+        }                                               \
+        double b = AS_NUMBER(pop());                    \
+        double a = AS_NUMBER(pop());                    \
+        push(valueType(a op b));                        \
+    } while (false);
 
-    for (;;) {
+    for (;;)
+    {
 #ifdef DEBUG_TRACE_EXECUTION
         printf("        ");
-        for (Value* slot = vm.stack; slot < vm.stackTop; slot++) {
+        for (Value *slot = vm.stack; slot < vm.stackTop; slot++)
+        {
             printf("[ ");
             printValue(*slot);
             printf(" ]");
@@ -105,138 +121,202 @@ static InterpretResult run() {
 #endif
 
         uint8_t instruction = READ_BYTE();
-        switch (__builtin_expect(instruction, OP_CONSTANT)) {
-            case OP_CONSTANT: {
-                Value constant = READ_CONSTANT();
-                push(constant);
-                break;
+        switch (__builtin_expect(instruction, OP_CONSTANT))
+        {
+        case OP_CONSTANT:
+        {
+            Value constant = READ_CONSTANT();
+            push(constant);
+            break;
+        }
+        case OP_NULL:
+        {
+            push(NULL_VAL);
+            break;
+        }
+        case OP_TRUE:
+        {
+            push(BOOL_VAL(true));
+            break;
+        }
+        case OP_FALSE:
+        {
+            push(BOOL_VAL(false));
+            break;
+        }
+        case OP_POP:
+        {
+            pop();
+            break;
+        }
+        case OP_GET_GLOBAL:
+        {
+            ObjString *name = READ_STRING();
+            Value value;
+            if (!tableGet(&vm.globals, name, &value))
+            {
+                runtimeError("Undefined variable '%s'.", name->chars);
+                return INTERPRET_RUNTIME_ERROR;
             }
-            case OP_NULL:{
-                push(NULL_VAL); break;
-            }
-            case OP_TRUE:{
-                push(BOOL_VAL(true)); break;
-            }
-            case OP_FALSE:{
-                push(BOOL_VAL(false)); break;
-            }
-            case OP_POP: {
-                pop(); break;
-            }
-            case OP_GET_GLOBAL: {
-                ObjString* name = READ_STRING();
-                Value value;
-                if (!tableGet(&vm.globals, name, &value)) {
-                    runtimeError("Undefined variable '%s'.", name->chars);
-                    return INTERPRET_RUNTIME_ERROR;
-                }
-                push(value);
-                break;
-            }
-            case OP_DEFINE_GLOBAL: {
-                ObjString* name = READ_STRING();
-                tableSet(&vm.globals, name, peek(0));
-                pop();
-                break;
-            }
-            case OP_SET_GLOBAL: {
-                ObjString* name = READ_STRING();
-                if (tableSet(&vm.globals, name, peek(0))) {
+            push(value);
+            break;
+        }
+        case OP_DEFINE_GLOBAL:
+        {
+            ObjString *name = READ_STRING();
+            tableSet(&vm.globals, name, peek(0));
+            pop();
+            break;
+        }
+        case OP_SET_GLOBAL:
+        {
+            ObjString *name = READ_STRING();
+            if (tableSet(&vm.globals, name, peek(0)))
+            {
                 tableDelete(&vm.globals, name);
                 runtimeError("Undefined variable '%s'.", name->chars);
                 return INTERPRET_RUNTIME_ERROR;
-                }
-                break;
             }
-            case OP_EQUAL: {
-                Value b = pop();
-                Value a = pop();
-                push(BOOL_VAL(valuesEqual(a,b)));
-                break;
+            break;
+        }
+        case OP_EQUAL:
+        {
+            Value b = pop();
+            Value a = pop();
+            push(BOOL_VAL(valuesEqual(a, b)));
+            break;
+        }
+        case OP_IS:
+        {
+            Value b = pop();
+            Value a = pop();
+            push(BOOL_VAL(valuesEqual(a, b)));
+            break;
+        }
+        case OP_GREATER:
+        {
+            BINARY_OP(BOOL_VAL, >);
+            break;
+        }
+        case OP_LESS:
+        {
+            BINARY_OP(BOOL_VAL, <);
+            break;
+        }
+        case OP_ADD:
+        {
+            if (IS_STRING(peek(0)) && IS_STRING(peek(1)))
+            {
+                concatenate();
             }
-            case OP_IS: {
-                Value b = pop();
-                Value a = pop();
-                push(BOOL_VAL(valuesEqual(a,b)));
-                break;
+            else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1)))
+            {
+                double b = AS_NUMBER(pop());
+                double a = AS_NUMBER(pop());
+                push(NUMBER_VAL(a + b));
             }
-            case OP_GREATER:{
-                BINARY_OP(BOOL_VAL, >); break;
-            }
-            case OP_LESS:{
-                BINARY_OP(BOOL_VAL, <); break;
-            }
-            case OP_ADD: {
-                if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
-                    concatenate();
-                } else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
-                    double b = AS_NUMBER(pop());
-                    double a = AS_NUMBER(pop());
-                    push(NUMBER_VAL(a + b));
-                } else {
-                    runtimeError(
+            else
+            {
+                runtimeError(
                     "Operands must be two numbers or two strings.");
-                    return INTERPRET_RUNTIME_ERROR;
-                }
-                break;
+                return INTERPRET_RUNTIME_ERROR;
             }
-            case OP_SUBTRACT:{
-                BINARY_OP(NUMBER_VAL, -);
-                break;
+            break;
+        }
+        case OP_SUBTRACT:
+        {
+            BINARY_OP(NUMBER_VAL, -);
+            break;
+        }
+        case OP_MULTIPLY:
+        {
+            BINARY_OP(NUMBER_VAL, *);
+            break;
+        }
+        case OP_DIVIDE:
+        {
+            BINARY_OP(NUMBER_VAL, /);
+            break;
+        }
+        case OP_NOT:
+        {
+            push(BOOL_VAL(isFalsey(pop())));
+            break;
+        }
+        case OP_NEGATE:
+        {
+            if (!IS_NUMBER(peek(0)))
+            {
+                runtimeError("Operand must be a number.");
+                return INTERPRET_RUNTIME_ERROR;
             }
-            case OP_MULTIPLY:{
-                BINARY_OP(NUMBER_VAL, *);
-                break;
-            }
-            case OP_DIVIDE:{
-                BINARY_OP(NUMBER_VAL, /);
-                break;
-            }
-            case OP_NOT:{
-                push(BOOL_VAL(isFalsey(pop())));
-                break;
-            }
-            case OP_NEGATE:{
-                if (!IS_NUMBER(peek(0))) {
-                    runtimeError("Operand must be a number.");
-                    return INTERPRET_RUNTIME_ERROR;
-                    }
-                    push(NUMBER_VAL(-AS_NUMBER(pop())));
-                    break;
-            }
-            case OP_WRITE: {
-                printValue(pop());
-                printf("\n");
-                break;
-            }
-            case OP_ASK: {
-                ObjString* message = AS_STRING(pop());
-                printf("%s", message->chars);
+            push(NUMBER_VAL(-AS_NUMBER(pop())));
+            break;
+        }
+        case OP_WRITE:
+        {
+            printValue(pop());
+            printf("\n");
+            break;
+        }
+        case OP_ASK:
+        {
+            ObjString *message = AS_STRING(pop());
+            printf("%s", message->chars);
 
-                char buffer[256];
-                if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
-                    buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline
-                    push(OBJ_VAL(copyString(buffer, strlen(buffer))));
-                } else {
-                    push(OBJ_VAL(copyString("", 0))); // Handle EOF or error
+            size_t bufferSize = 256;
+            char *buffer = ALLOCATE(char, bufferSize);
+            size_t inputLength = 0;
+            int c;
+
+            while ((c = getchar()) != '\n' && c != EOF)
+            {
+                if (inputLength == bufferSize - 1)
+                {
+                    size_t oldSize = bufferSize;
+                    bufferSize *= 1.5;
+                    char *newBuffer = GROW_ARRAY(char, buffer, oldSize, bufferSize);
+                    if (newBuffer == NULL)
+                    {
+                        runtimeError("Memory allocation failed.");
+                        FREE_ARRAY(char, buffer, oldSize);
+                        return INTERPRET_RUNTIME_ERROR;
+                    }
+                    buffer = newBuffer;
                 }
-                break;
+                buffer[inputLength++] = (char)c;
             }
-            case OP_RETURN: {
-                return INTERPRET_OK;
+
+            buffer[inputLength] = '\0';
+
+            if (c == EOF && inputLength == 0)
+            {
+                FREE_ARRAY(char, buffer, bufferSize);
+                push(OBJ_VAL(copyString("", 0)));
             }
+            else
+            {
+                push(OBJ_VAL(takeString(buffer, inputLength)));
+            }
+            break;
+        }
+        case OP_RETURN:
+        {
+            return INTERPRET_OK;
+        }
         }
     }
 #undef READ_STRING
 #undef BINARY_OP
 }
 
-
-InterpretResult interpret(const char* source){
+InterpretResult interpret(const char *source)
+{
     Chunk chunk;
     initChunk(&chunk);
 
-    if(!compile(source, &chunk)){
+    if (!compile(source, &chunk))
+    {
         freeChunk(&chunk);
         return INTERPRET_COMPILE_ERROR;
     }
