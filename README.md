@@ -9,22 +9,15 @@ Kavya is derived from Clox, the C implementation of the Lox language from the bo
 
 
 
-    
-
-
-
-
-
-
 
 ## Features
 
 - ***`Simple Syntax`***: Kavya's syntax is designed to be easy to read and write, making it intuitive for both new and experienced programmers.
 - ***`Dynamic typing`***: Kavya allows you to use variables without explicitly declaring their types, providing flexibility in your code.
-- ***`Grabage collector`***: Kavya automatically manages memory allocation and deallocation, simplifying memory management for developers.
+- ***`Garbage collector`***: Kavya automatically manages memory allocation and deallocation, simplifying memory management for developers.
 
 
-## Installation Process (Current Development stage):
+## Installation Process (Current Development status):
 Kavya is currently under active development, offical installation process is not available yet.
 However, we can compile the code from source with the help of some tools.
 
@@ -46,8 +39,8 @@ However, we can compile the code from source with the help of some tools.
 
 3) Running
 ```bash
-    kavya
-    kavya <file name>.kav
+    kavya            #Run Kavya REPL
+    kavya <file.kav> #Run a specific Kavya file
 ```
 
 ## Demo
@@ -71,6 +64,9 @@ To take input from the user in kavya, use the **`ask`** keyword followed by the 
 ```kavya
    the love is (ask "What's your love?: "); // Input: You
 ```
+"In Kavya, user input is stored as a string by default, ensuring simplicity and consistency in handling input data. However, future updates will introduce support for data type conversion, allowing developers to work seamlessly with different types of input."
+
+
 
 #### 4) Printing statenments with variables
 In Kavya we can print a statement that includes a variable by using the **`+`** symbol to concatenate the text and variable value.
