@@ -61,18 +61,26 @@ Printing "Hello World" to the screen.
 In Kavya variables are declare from **`the`** keyword and can be assign with with **`'='`** or **`is`**.
 
 ```kavya
+    the programming is "boring";
     the rose is "red";
-    write rose; // Output: red
+    the sky is "blue";
 ```
 
 #### 3) Taking input from user
+To take input from the user in kavya, use the **`ask`** keyword followed by the prompt message in quotes.
+```kavya
+   the love is (ask "What's your love?: "); // Input: You
+```
+
+#### 4) Printing statenments with variables
+In Kavya we can print a statement that includes a variable by using the **`+`** symbol to concatenate the text and variable value.
 
 ```kavya
-   the you is (ask "Who are you?"); // Input: Poet
-   write "Hello " +  you + " Plus Programmer";
-   
-   //Output: Hello Poet Plus Programmer
+    write "Roses are " + rose + " Sky is " + sky + " Programming is " + programming + " without " + love;
+
+    // Output: Roses are red Sky is blue Programming is boring without You
 ```
+
 ## Contributing
 
 Contributions are always welcome!
