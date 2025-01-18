@@ -64,7 +64,7 @@ To take input from the user in kavya, use the **`ask`** keyword followed by the 
 ```kavya
    the love is (ask "What's your love?: "); // Input: You
 ```
-"In Kavya, user input is stored as a string by default, ensuring simplicity and consistency in handling input data. However, future updates will introduce support for data type conversion, allowing developers to work seamlessly with different types of input."
+In Kavya, user input is stored as a string by default, ensuring simplicity and consistency in handling input data. However, future updates will introduce support for data type conversion, allowing developers to work seamlessly with different types of input.
 
 
 
