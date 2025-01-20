@@ -15,6 +15,7 @@ Kavya is derived from Clox, the C implementation of the Lox language from the bo
 
 ## Installation Process (Current Development stage):
 
+
 Kavya is currently under active development, offical installation process is not available yet.
 However, we can compile the code from source with the help of some tools.
 
@@ -41,8 +42,8 @@ However, we can compile the code from source with the help of some tools.
 3. Running
 
 ```bash
-    kavya
-    kavya <file name>.kav
+    kavya            #Run Kavya REPL
+    kavya <file.kav> #Run a specific Kavya file
 ```
 
 ## Demo
@@ -60,11 +61,22 @@ Printing "Hello World" to the screen.
 In Kavya variables are declare from **`the`** keyword and can be assign with with **`'='`** or **`is`**.
 
 ```kavya
+    the programming is "boring";
     the rose is "red";
-    write rose; // Output: red
+    the sky is "blue";
 ```
 
 #### 3) Taking input from user
+To take input from the user in kavya, use the **`ask`** keyword followed by the prompt message in quotes.
+```kavya
+   the love is (ask "What's your love?: "); // Input: You
+```
+In Kavya, user input is stored as a string by default, ensuring simplicity and consistency in handling input data. However, future updates will introduce support for data type conversion, allowing developers to work seamlessly with different types of input.
+
+
+
+#### 4) Printing statenments with variables
+In Kavya we can print a statement that includes a variable by using the **`+`** symbol to concatenate the text and variable value.
 
 ```kavya
    the you is (ask "Who are you?"); // Input: Poet
@@ -85,4 +97,5 @@ Licensed under the [MIT](https://choosealicense.com/licenses/mit/)
 
 ## Acknowledgements
 
-- Inspired by [Crafting Interpreters]("https://craftinginterpreters.com/") by Robert Nystrom.
+
+- Inspired by [Crafting Interpreters](https://craftinginterpreters.com/) by Robert Nystrom.
