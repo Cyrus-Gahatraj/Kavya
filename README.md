@@ -10,10 +10,10 @@ Kavya is derived from Clox, the C implementation of the Lox language from the bo
 
 - **_`Simple Syntax`_**: Kavya's syntax is designed to be easy to read and write, making it intuitive for both new and experienced programmers.
 - **_`Dynamic typing`_**: Kavya allows you to use variables without explicitly declaring their types, providing flexibility in your code.
-- **_`Grabage collector`_**: Kavya automatically manages memory allocation and deallocation, simplifying memory management for developers.
+- **_`Garbage collector`_**: Kavya automatically manages memory allocation and deallocation, simplifying memory management for developers.
 - **_`REPL`_**: Kavya includes a REPL (Read-Eval-Print Loop) feature that allows you to interact with the language in real-time, without writing and saving entire scripts.
 
-## Installation Process (Current Development stage):
+## Installation Process (Current Development status):
 
 Kavya is currently under active development, offical installation process is not available yet.
 However, we can compile the code from source with the help of some tools.
@@ -41,8 +41,8 @@ However, we can compile the code from source with the help of some tools.
 3. Running
 
 ```bash
-    kavya
-    kavya <file name>.kav
+    kavya            #Run Kavya REPL
+    kavya <file.kav> #Run a specific Kavya file
 ```
 
 ## Demo
@@ -60,17 +60,29 @@ Printing "Hello World" to the screen.
 In Kavya variables are declare from **`the`** keyword and can be assign with with **`'='`** or **`is`**.
 
 ```kavya
+    the programming is "boring";
     the rose is "red";
-    write rose; // Output: red
+    the sky is "blue";
 ```
 
 #### 3) Taking input from user
 
-```kavya
-   the you is (ask "Who are you?"); // Input: Poet
-   write "Hello " +  you + " Plus Programmer";
+To take input from the user in kavya, use the **`ask`** keyword followed by the prompt message in quotes.
 
-   //Output: Hello Poet Plus Programmer
+```kavya
+   the love is (ask "What's your love?: "); // Input: You
+```
+
+In Kavya, user input is stored as a string by default, ensuring simplicity and consistency in handling input data. However, future updates will introduce support for data type conversion, allowing developers to work seamlessly with different types of input.
+
+#### 4) Printing statenments with variables
+
+In Kavya we can print a statement that includes a variable by using the **`+`** symbol to concatenate the text and variable value.
+
+```kavya
+    write "Roses are " + rose + " Sky is " + sky + " Programming is " + programming + " without " + love;
+
+    // Output: Roses are red Sky is blue Programming is boring without You
 ```
 
 ## Contributing
@@ -85,4 +97,4 @@ Licensed under the [MIT](https://choosealicense.com/licenses/mit/)
 
 ## Acknowledgements
 
-- Inspired by [Crafting Interpreters]("https://craftinginterpreters.com/") by Robert Nystrom.
+- Inspired by [Crafting Interpreters](https://craftinginterpreters.com/) by Robert Nystrom.
