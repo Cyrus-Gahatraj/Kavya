@@ -89,6 +89,11 @@ static inline Value READ_CONSTANT()
     return vm.chunk->constants.values[READ_BYTE()];
 }
 
+static inline uint16_t READ_SHORT()
+{
+    return (vm.ip += 2, (uint16_t)((vm.ip[-2] << 8) | vm.ip[-1]));
+}
+
 static InterpretResult run()
 {
 
@@ -312,9 +317,33 @@ static InterpretResult run()
             }
             break;
         }
+        case OP_JUMP:
+        {
+            uint16_t offset = READ_SHORT();
+            vm.ip += offset;
+            break;
+        }
+        case OP_JUMP_IF_FALSE:
+        {
+            uint16_t offset = READ_SHORT();
+            if (isFalsey(peek(0)))
+                vm.ip += offset;
+            break;
+        }
+        case OP_LOOP:
+        {
+            uint16_t offset = READ_SHORT();
+            vm.ip -= offset;
+            break;
+        }
         case OP_RETURN:
         {
             return INTERPRET_OK;
+        }
+        default:
+        {
+            runtimeError("Unknown opcode %d.", instruction);
+            return INTERPRET_RUNTIME_ERROR;
         }
         }
     }

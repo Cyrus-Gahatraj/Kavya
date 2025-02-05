@@ -149,6 +149,25 @@ static void emitBytes(uint8_t byte1, uint8_t byte2)
     emitByte(byte2);
 }
 
+static void emitLoop(int loopStart)
+{
+    emitByte(OP_LOOP);
+
+    int offset = currentChunk()->count - loopStart + 2;
+    if (offset > UINT16_MAX)
+        error("Loop body too large.");
+    emitByte((offset >> 8) & 0xff);
+    emitByte(offset & 0xff);
+}
+
+static int emitJump(uint8_t instruction)
+{
+    emitByte(instruction);
+    emitByte(0xff);
+    emitByte(0xff);
+    return currentChunk()->count - 2;
+}
+
 static void emitReturn()
 {
     emitByte(OP_RETURN);
@@ -171,6 +190,19 @@ static void emitConstant(Value value)
     emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
+static void patchJump(int offset)
+{
+    int jump = currentChunk()->count - offset - 2;
+
+    if (jump > UINT16_MAX)
+    {
+        error("Too much code to jump over.");
+    }
+
+    currentChunk()->code[offset] = (jump >> 8) & 0xff;
+    currentChunk()->code[offset + 1] = jump & 0xff;
+}
+
 static void initCompiler(Compiler *compiler)
 {
     compiler->localCount = 0;
@@ -191,7 +223,6 @@ static void endCompiler()
 
 static void beginScope()
 {
-    current->scopeDepth++;
     current->scopeDepth++;
 }
 
@@ -287,6 +318,24 @@ static void number(bool canAssign)
     emitConstant(NUMBER_VAL(value));
 }
 
+static void and_(bool canAssign)
+{
+    int endJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    parsePrecedence(PREC_AND);
+    patchJump(endJump);
+}
+
+static void or_(bool canAssign)
+{
+    int elseJump = emitJump(OP_JUMP_IF_FALSE);
+    int endJump = emitJump(OP_JUMP);
+    patchJump(elseJump);
+    emitByte(OP_POP);
+    parsePrecedence(PREC_OR);
+    patchJump(endJump);
+}
+
 static void string(bool canAssign)
 {
     emitConstant(OBJ_VAL(copyString(parser.previous.start + 1,
@@ -358,9 +407,9 @@ static void declareVariable()
         {
             error("Already variable with this name in this scope.");
         }
-
-        addLocal(*name);
     }
+
+    addLocal(*name);
 }
 
 static void namedVariable(Token name, bool canAssign)
@@ -438,7 +487,7 @@ ParseRule rules[] = {
     [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_PRIMARY},
-    [TOKEN_AND] = {NULL, NULL, PREC_NONE},
+    [TOKEN_AND] = {NULL, and_, PREC_AND},
     [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_PRIMARY},
@@ -446,7 +495,7 @@ ParseRule rules[] = {
     [TOKEN_PURPOSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_IF] = {NULL, NULL, PREC_NONE},
     [TOKEN_NULL] = {literal, NULL, PREC_PRIMARY},
-    [TOKEN_OR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_OR] = {NULL, or_, PREC_OR},
     [TOKEN_WRITE] = {NULL, NULL, PREC_NONE},
     [TOKEN_ASK] = {askExpression, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
@@ -556,11 +605,109 @@ static void expressionStatement()
     emitByte(OP_POP);
 }
 
+static void forStatement()
+{
+    beginScope(); // Start a new scope for the loop
+
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
+
+    // Handle variable declaration
+    if (match(TOKEN_SEMICOLON))
+    {
+        // No initializer
+    }
+    else if (match(TOKEN_THE))
+    {
+        theDeclaration(); // Declare the variable 'a' and add it to the scope
+    }
+    else
+    {
+        expressionStatement();
+    }
+
+    int loopStart = currentChunk()->count;
+
+    // Handle loop condition
+    int exitJump = -1;
+    if (!match(TOKEN_SEMICOLON))
+    {
+        expression(); // Evaluate the loop condition
+        consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
+
+        exitJump = emitJump(OP_JUMP_IF_FALSE); // Jump out of the loop if the condition is false
+        emitByte(OP_POP);                      // Pop the condition value
+    }
+
+    // Handle loop increment
+    if (!match(TOKEN_RIGHT_PAREN))
+    {
+        int bodyJump = emitJump(OP_JUMP); // Jump to the loop body
+
+        int incrementStart = currentChunk()->count;
+        expression();     // Evaluate the increment expression
+        emitByte(OP_POP); // Pop the increment value
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
+
+        emitLoop(loopStart); // Jump back to the start of the loop
+        loopStart = incrementStart;
+        patchJump(bodyJump); // Patch the jump to the loop body
+    }
+
+    // Handle loop body
+    statement();
+    emitLoop(loopStart); // Jump back to the start of the loop
+
+    // Handle loop exit
+    if (exitJump != -1)
+    {
+        patchJump(exitJump); // Patch the exit jump
+        emitByte(OP_POP);    // Pop the condition value
+    }
+
+    endScope(); // End the scope for the loop
+}
+
+static void ifStatement()
+{
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+    int thenJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    statement();
+
+    int elseJump = emitJump(OP_JUMP);
+
+    patchJump(thenJump);
+    emitByte(OP_POP);
+    if (match(TOKEN_ELSE))
+        statement();
+    patchJump(elseJump);
+}
+
 static void writeStatement()
 {
     expression();
     consume(TOKEN_SEMICOLON, "Expect ';' after value.");
     emitByte(OP_WRITE);
+}
+
+static void whileStatement()
+{
+    int loopStart = currentChunk()->count;
+    consume(TOKEN_LEFT_PAREN, "Expecct '(' after 'while'.");
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+    int exitJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    statement();
+
+    emitLoop(loopStart);
+
+    patchJump(exitJump);
+    emitByte(OP_POP);
 }
 
 static void synchronize()
@@ -609,6 +756,18 @@ static void statement()
     if (match(TOKEN_WRITE))
     {
         writeStatement();
+    }
+    else if (match(TOKEN_FOR))
+    {
+        forStatement();
+    }
+    else if (match(TOKEN_IF))
+    {
+        ifStatement();
+    }
+    else if (match(TOKEN_WHILE))
+    {
+        whileStatement();
     }
     else if (match(TOKEN_LEFT_BRACE))
     {
