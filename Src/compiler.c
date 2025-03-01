@@ -472,7 +472,7 @@ ParseRule rules[] = {
     [TOKEN_DOT] = {NULL, NULL, PREC_NONE},
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
-    [TOKEN_SEMICOLON] = {NULL, NULL, PREC_NONE},
+    [TOKEN_COLON] = {NULL, NULL, PREC_NONE},
     [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},
     [TOKEN_BANG] = {unary, NULL, PREC_UNARY},
@@ -594,77 +594,79 @@ static void theDeclaration()
     {
         emitByte(OP_NULL);
     }
-    consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
+    consume(TOKEN_DOT, "Expect '.' after variable declaration.");
     defineVariable(global);
 }
 
 static void expressionStatement()
 {
     expression();
-    consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
+    consume(TOKEN_DOT, "Expect '.' after expression.");
     emitByte(OP_POP);
 }
 
 static void forStatement()
 {
-    beginScope(); // Start a new scope for the loop
+    beginScope();
 
     consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
 
-    // Handle variable declaration
-    if (match(TOKEN_SEMICOLON))
+    if (match(TOKEN_THE))
     {
-        // No initializer
+        uint8_t global = parseVariable("Expect variable name.");
+        if (match(TOKEN_EQUAL) || match(TOKEN_IS))
+        {
+            expression();
+        }
+        else
+        {
+            emitByte(OP_NULL);
+        }
+        consume(TOKEN_COMMA, "Expect ',' after variable declaration.");
+        defineVariable(global);
     }
-    else if (match(TOKEN_THE))
+    else if (!match(TOKEN_COMMA))
     {
-        theDeclaration(); // Declare the variable 'a' and add it to the scope
-    }
-    else
-    {
-        expressionStatement();
+        expression();
+        consume(TOKEN_COMMA, "Expect ',' after initializer.");
     }
 
     int loopStart = currentChunk()->count;
 
-    // Handle loop condition
     int exitJump = -1;
-    if (!match(TOKEN_SEMICOLON))
+    if (!match(TOKEN_COMMA))
     {
-        expression(); // Evaluate the loop condition
-        consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
+        expression();
+        consume(TOKEN_COMMA, "Expect ',' after loop condition.");
 
-        exitJump = emitJump(OP_JUMP_IF_FALSE); // Jump out of the loop if the condition is false
-        emitByte(OP_POP);                      // Pop the condition value
+        exitJump = emitJump(OP_JUMP_IF_FALSE);
+        emitByte(OP_POP);
     }
 
-    // Handle loop increment
     if (!match(TOKEN_RIGHT_PAREN))
     {
-        int bodyJump = emitJump(OP_JUMP); // Jump to the loop body
+        int bodyJump = emitJump(OP_JUMP);
 
         int incrementStart = currentChunk()->count;
-        expression();     // Evaluate the increment expression
-        emitByte(OP_POP); // Pop the increment value
+        expression();
+        emitByte(OP_POP);
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
 
-        emitLoop(loopStart); // Jump back to the start of the loop
+        emitLoop(loopStart);
         loopStart = incrementStart;
-        patchJump(bodyJump); // Patch the jump to the loop body
+        patchJump(bodyJump);
     }
 
-    // Handle loop body
     statement();
-    emitLoop(loopStart); // Jump back to the start of the loop
+    emitLoop(loopStart);
 
-    // Handle loop exit
     if (exitJump != -1)
     {
-        patchJump(exitJump); // Patch the exit jump
-        emitByte(OP_POP);    // Pop the condition value
+        patchJump(exitJump);
+        emitByte(OP_POP);
     }
 
-    endScope(); // End the scope for the loop
+    endScope();
 }
 
 static void ifStatement()
@@ -689,7 +691,7 @@ static void ifStatement()
 static void writeStatement()
 {
     expression();
-    consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+    consume(TOKEN_DOT, "Expect '.' after value.");
     emitByte(OP_WRITE);
 }
 
@@ -715,7 +717,7 @@ static void synchronize()
     parser.panicMode = false;
     while (parser.current.type != TOKEN_EOF)
     {
-        if (parser.previous.type == TOKEN_SEMICOLON)
+        if (parser.previous.type == TOKEN_DOT)
             return;
         switch (parser.current.type)
         {
