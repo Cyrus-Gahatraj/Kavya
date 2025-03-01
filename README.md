@@ -52,7 +52,7 @@ However, we can compile the code from source with the help of some tools.
 Printing "Hello World" to the screen.
 
 ```kavya
-    write "Hello World";  // Output: Hello World
+    write "Hello World".  // Output: Hello World
 ```
 
 #### 2) Variables
@@ -60,9 +60,9 @@ Printing "Hello World" to the screen.
 In Kavya variables are declare from **`the`** keyword and can be assign with with **`'='`** or **`is`**.
 
 ```kavya
-    the programming is "boring";
-    the rose is "red";
-    the sky is "blue";
+    the programming = "boring".
+    the rose is "red".
+    the sky is "blue".
 ```
 
 #### 3) Taking input from user
@@ -70,7 +70,7 @@ In Kavya variables are declare from **`the`** keyword and can be assign with wit
 To take input from the user in kavya, use the **`ask`** keyword followed by the prompt message in quotes.
 
 ```kavya
-   the love is (ask "What's your love?: "); // Input: You
+   the love is (ask "What's your love?: "). // Input: You
 ```
 
 In Kavya, user input is stored as a string by default, ensuring simplicity and consistency in handling input data. However, future updates will introduce support for data type conversion, allowing developers to work seamlessly with different types of input.
@@ -80,7 +80,7 @@ In Kavya, user input is stored as a string by default, ensuring simplicity and c
 In Kavya we can print a statement that includes a variable by using the **`+`** symbol to concatenate the text and variable value.
 
 ```kavya
-    write "Roses are " + rose + " Sky is " + sky + " Programming is " + programming + " without " + love;
+    write "Roses are " + rose + " Sky is " + sky + " Programming is " + programming + " without " + love.
 
     // Output: Roses are red Sky is blue Programming is boring without You
 ```
