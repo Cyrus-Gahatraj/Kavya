@@ -71,6 +71,14 @@ static void repl()
             printf("\n");
             break;
         }
+
+        line[strcspn(line, "\n")] = '\0';
+
+        if (strcmp(line, "exit") == 0)
+        {
+            printf("Exiting...\nGoodbye!\n");
+            break;
+        }
         interpret(line);
     }
 }
