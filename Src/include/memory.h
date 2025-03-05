@@ -1,6 +1,4 @@
-#ifndef MEMORY_H
-#define MEMORY_H
-
+#pragma once
 #include "main.h"
 #include "object.h"
 
@@ -21,5 +19,3 @@
 
 void *reallocate(void *pointer, size_t oldSize, size_t newSize);
 void freeObjects();
-
-#endif

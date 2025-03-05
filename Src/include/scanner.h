@@ -1,5 +1,4 @@
-#ifndef SCANNER_H
-#define SCANNER_H
+#pragma once
 
 typedef enum
 {
@@ -61,5 +60,3 @@ typedef struct
 
 void initScanner(const char *source);
 Token scanToken();
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef CHUCK_H
-#define CHUCK_H
+#pragma once
 
 #include "main.h"
 #include "value.h"
@@ -47,5 +46,3 @@ void initChunk(Chunk *chunk);
 void freeChunk(Chunk *chunk);
 void writeChunk(Chunk *chuck, uint8_t byte, int line);
 int addConstant(Chunk *chunk, Value value);
-
-#endif
