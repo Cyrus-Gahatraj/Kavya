@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "include/object.h"
-#include "include/memory.h"
-#include "include/value.h"
+#include "kavya/object.h"
+#include "kavya/memory.h"
+#include "kavya/value.h"
 
 void initValueArray(ValueArray *array)
 {

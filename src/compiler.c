@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "include/main.h"
-#include "include/compiler.h"
-#include "include/scanner.h"
+#include "kavya/main.h"
+#include "kavya/compiler.h"
+#include "kavya/scanner.h"
 
 #ifdef DEBUG_PRINT_CODE
-#include "include/debug.h"
+#include "kavya/debug.h"
 #endif
 
 typedef struct

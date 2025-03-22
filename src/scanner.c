@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "include/main.h"
-#include "include/scanner.h"
+#include "kavya/main.h"
+#include "kavya/scanner.h"
 
 typedef struct
 {

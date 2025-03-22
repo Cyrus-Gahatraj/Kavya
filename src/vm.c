@@ -2,12 +2,12 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "include/main.h"
-#include "include/compiler.h"
-#include "include/debug.h"
-#include "include/object.h"
-#include "include/memory.h"
-#include "include/vm.h"
+#include "kavya/main.h"
+#include "kavya/compiler.h"
+#include "kavya/debug.h"
+#include "kavya/object.h"
+#include "kavya/memory.h"
+#include "kavya/vm.h"
 
 VM vm;
 

@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "include/memory.h"
-#include "include/object.h"
-#include "include/table.h"
-#include "include/value.h"
-#include "include/vm.h"
+#include "kavya/memory.h"
+#include "kavya/object.h"
+#include "kavya/table.h"
+#include "kavya/value.h"
+#include "kavya/vm.h"
 
 #define ALLOCATE_OBJ(type, objectType) \
     (type *)allocateObject(sizeof(type), objectType)

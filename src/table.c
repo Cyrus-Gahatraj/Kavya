@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "include/memory.h"
-#include "include/object.h"
-#include "include/table.h"
-#include "include/value.h"
+#include "kavya/memory.h"
+#include "kavya/object.h"
+#include "kavya/table.h"
+#include "kavya/value.h"
 
 #define TABLE_MAX_LOAD 0.75
 

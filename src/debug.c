@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "include/debug.h"
-#include "include/value.h"
+#include "kavya/debug.h"
+#include "kavya/value.h"
 
 void disassembleChunk(Chunk *chunk, const char *name)
 {

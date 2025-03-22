@@ -1,6 +1,6 @@
 #include <stdlib.h>
-#include "include/memory.h"
-#include "include/vm.h"
+#include "kavya/memory.h"
+#include "kavya/vm.h"
 
 void *reallocate(void *pointer, size_t oldSize, size_t newSize)
 {

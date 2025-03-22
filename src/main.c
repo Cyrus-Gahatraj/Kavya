@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "include/main.h"
-#include "include/chunk.h"
-#include "include/debug.h"
-#include "include/vm.h"
+#include "kavya/main.h"
+#include "kavya/chunk.h"
+#include "kavya/debug.h"
+#include "kavya/vm.h"
 
 // Function to check if the file has the .kav extension
 static int hasKavExtension(const char *path)
