@@ -28,7 +28,7 @@ However, we can compile the code from source with the help of some tools.
 1.  **Clone the Repository:**
 
     ```bash
-    git clone [https://github.com/Cyrus-Gahatraj/Kavya.git](https://github.com/Cyrus-Gahatraj/Kavya.git)
+    git clone https://github.com/Cyrus-Gahatraj/Kavya.git
     cd Kavya
     ```
 

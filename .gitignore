@@ -8,3 +8,6 @@ CMakeFiles/
 
 # Object files
 *.o
+
+#Test
+test/
