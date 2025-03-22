@@ -1,3 +1,10 @@
-*.o
+# Build directory
+build/
+CMakeCache.txt
+CMakeFiles/
+
+# Executables
 *.out
-test/
+
+# Object files
+*.o

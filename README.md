@@ -18,32 +18,69 @@ Kavya is derived from Clox, the C implementation of the Lox language from the bo
 Kavya is currently under active development, offical installation process is not available yet.
 However, we can compile the code from source with the help of some tools.
 
-### Prerequisites:
+## Prerequisites
 
-- **`GCC (C compiler)`**
-- **`Makefile`**
+* **GCC (C compiler):** Required for compiling the C source code.
+* **CMake:** Used for building the project.
 
-### Building kavya from source
+## Building Kavya from Source
 
-1. Clone the repository
+1.  **Clone the Repository:**
 
-```bash
-  git clone https://github.com/Cyrus-Gahatraj/Kavya.git
-  cd Kavya
-```
+    ```bash
+    git clone [https://github.com/Cyrus-Gahatraj/Kavya.git](https://github.com/Cyrus-Gahatraj/Kavya.git)
+    cd Kavya
+    ```
 
-2. Building
+2.  **Create a Build Directory and Generate Build Files:**
 
-```bash
+    ```bash
+    mkdir build
+    cd build
+    cmake ..
+    ```
+
+3.  **Build the Executable:**
+
+    ```bash
     make
-```
+    ```
 
-3. Running
+4.  **Install (Optional):**
 
-```bash
-    kavya            #Run Kavya REPL
-    kavya <file.kav> #Run a specific Kavya file
-```
+    ```bash
+    sudo make install #Installs to /usr/local/bin
+    ```
+
+## Running Kavya
+
+* **Run the REPL (Read-Eval-Print Loop):**
+
+    ```bash
+    ./kavya.out  #If not installed. If installed just use kavya
+    ```
+    or
+    ```bash
+    kavya #If installed
+    ```
+
+* **Run a Specific Kavya File:**
+
+    ```bash
+    ./kavya.out <file.kav> #If not installed. If installed just use kavya
+    ```
+    or
+    ```bash
+    kavya <file.kav> #if installed.
+    ```
+
+## Notes
+
+* Ensure that you have the necessary dependencies installed before attempting to build Kavya.
+* The `sudo make install` command requires administrator privileges.
+* The kavya.out file is located in the build directory, if you do not install.
+* As Kavya is under active development, expect changes and updates.
+* If you have installed Kavya, you can use the command "kavya" from any directory.
 
 ## Demo
 
