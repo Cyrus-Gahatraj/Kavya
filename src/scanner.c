@@ -118,11 +118,10 @@ static void skipNonTokens()
         case '\n':
             scanner.line++;
             advance();
-            break;
+            return makeToken(TOKEN_NEWLINE);
         case '/':
             if (peekNext() == '/')
             {
-
                 while (peek() != '\n' && !isAtEnd())
                     advance();
             }

@@ -14,6 +14,7 @@ typedef enum
     TOKEN_COLON,
     TOKEN_SLASH,
     TOKEN_STAR,
+    TOKEN_NEWLINE,
     // One or two character tokens.
     TOKEN_BANG,
     TOKEN_BANG_EQUAL,

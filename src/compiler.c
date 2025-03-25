@@ -594,15 +594,19 @@ static void theDeclaration()
     {
         emitByte(OP_NULL);
     }
-    consume(TOKEN_DOT, "Expect '.' after variable declaration.");
     defineVariable(global);
 }
 
 static void expressionStatement()
 {
     expression();
-    consume(TOKEN_DOT, "Expect '.' after expression.");
     emitByte(OP_POP);
+}
+
+static void writeStatement()
+{
+    expression();
+    emitByte(OP_WRITE);
 }
 
 static void forStatement()
@@ -688,13 +692,6 @@ static void ifStatement()
     patchJump(elseJump);
 }
 
-static void writeStatement()
-{
-    expression();
-    consume(TOKEN_DOT, "Expect '.' after value.");
-    emitByte(OP_WRITE);
-}
-
 static void whileStatement()
 {
     int loopStart = currentChunk()->count;
@@ -717,7 +714,7 @@ static void synchronize()
     parser.panicMode = false;
     while (parser.current.type != TOKEN_EOF)
     {
-        if (parser.previous.type == TOKEN_DOT)
+        if (parser.previous.type == TOKEN_NEWLINE)
             return;
         switch (parser.current.type)
         {
