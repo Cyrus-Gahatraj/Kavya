@@ -107,18 +107,14 @@ static void skipNonTokens()
         switch (c)
         {
         case ' ':
-            advance();
-            break;
         case '\r':
-            advance();
-            break;
         case '\t':
             advance();
             break;
         case '\n':
             scanner.line++;
             advance();
-            return makeToken(TOKEN_NEWLINE);
+            break;
         case '/':
             if (peekNext() == '/')
             {
@@ -261,17 +257,33 @@ static Token string()
 
 Token scanToken()
 {
-
     skipNonTokens();
+
     scanner.start = scanner.current;
     if (isAtEnd())
         return makeToken(TOKEN_EOF);
 
     char c = advance();
+
+    // Handle indentation
+    if (c == ' ' || c == '\t')
+    {
+        int indentCount = 0;
+        while (c == ' ' || c == '\t')
+        {
+            indentCount++;
+            c = advance();
+        }
+        scanner.current--;
+        return makeToken(TOKEN_INDENT);
+    }
+
     if (isAlpha(c))
         return identifier();
+
     if (isDigit(c))
         return number();
+
     switch (c)
     {
     case '(':
@@ -283,7 +295,7 @@ Token scanToken()
     case '}':
         return makeToken(TOKEN_RIGHT_BRACE);
     case ';':
-        return makeToken(TOKEN_COLON);
+        return makeToken(TOKEN_SEMICOLON);
     case ',':
         return makeToken(TOKEN_COMMA);
     case '.':

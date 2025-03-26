@@ -613,8 +613,7 @@ static void forStatement()
 {
     beginScope();
 
-    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
-
+    // Initializer
     if (match(TOKEN_THE))
     {
         uint8_t global = parseVariable("Expect variable name.");
@@ -637,32 +636,36 @@ static void forStatement()
 
     int loopStart = currentChunk()->count;
 
+    // Condition
     int exitJump = -1;
     if (!match(TOKEN_COMMA))
     {
         expression();
         consume(TOKEN_COMMA, "Expect ',' after loop condition.");
 
+        // Jump out of the loop if the condition is false.
         exitJump = emitJump(OP_JUMP_IF_FALSE);
-        emitByte(OP_POP);
+        emitByte(OP_POP); // Pop the condition.
     }
 
-    if (!match(TOKEN_RIGHT_PAREN))
+    // Increment
+    int bodyJump = emitJump(OP_JUMP);
+    int incrementStart = currentChunk()->count;
+    if (!match(TOKEN_COMMA))
     {
-        int bodyJump = emitJump(OP_JUMP);
-
-        int incrementStart = currentChunk()->count;
         expression();
         emitByte(OP_POP);
-        consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
-
-        emitLoop(loopStart);
-        loopStart = incrementStart;
-        patchJump(bodyJump);
     }
 
-    statement();
     emitLoop(loopStart);
+    patchJump(bodyJump);
+
+    // Body
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before loop body.");
+    block();
+
+    // Jump back to increment
+    emitLoop(incrementStart);
 
     if (exitJump != -1)
     {
@@ -675,36 +678,42 @@ static void forStatement()
 
 static void ifStatement()
 {
-    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
     expression();
-    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
 
     int thenJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);
-    statement();
+    
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before if body.");
+    block();
 
     int elseJump = emitJump(OP_JUMP);
 
     patchJump(thenJump);
     emitByte(OP_POP);
+    
     if (match(TOKEN_ELSE))
-        statement();
+    {
+        consume(TOKEN_LEFT_BRACE, "Expect '{' before else body.");
+        block();
+    }
+    
     patchJump(elseJump);
 }
 
 static void whileStatement()
 {
     int loopStart = currentChunk()->count;
-    consume(TOKEN_LEFT_PAREN, "Expecct '(' after 'while'.");
+    
     expression();
-    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
 
     int exitJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);
-    statement();
-
+    
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before while body.");
+    block();
+    
     emitLoop(loopStart);
-
+    
     patchJump(exitJump);
     emitByte(OP_POP);
 }
@@ -780,8 +789,7 @@ static void statement()
     }
 }
 
-bool compile(const char *source, Chunk *chunk)
-{
+bool compile(const char *source, Chunk *chunk){
 
     initScanner(source);
     Compiler compiler;

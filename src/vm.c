@@ -62,7 +62,7 @@ static Value peek(int distance)
 
 static bool isFalsey(Value value)
 {
-    return IS_NULL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+    return IS_NULL(value) || (IS_BOOL(value) && !AS_BOOL(value)) || (IS_NUMBER(value) && AS_NUMBER(value) == 0);
 }
 
 static void concatenate()
@@ -327,7 +327,9 @@ static InterpretResult run()
         {
             uint16_t offset = READ_SHORT();
             if (isFalsey(peek(0)))
+            {
                 vm.ip += offset;
+            }
             break;
         }
         case OP_LOOP:
