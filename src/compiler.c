@@ -613,64 +613,119 @@ static void forStatement()
 {
     beginScope();
 
-    // Initializer
-    if (match(TOKEN_THE))
-    {
-        uint8_t global = parseVariable("Expect variable name.");
-        if (match(TOKEN_EQUAL) || match(TOKEN_IS))
+    bool hasParentheses = match(TOKEN_LEFT_PAREN);
+    if (hasParentheses) {
+
+        if (match(TOKEN_THE))
+        {
+            uint8_t global = parseVariable("Expect variable name.");
+            if (match(TOKEN_EQUAL) || match(TOKEN_IS))
+            {
+                expression();
+            }
+            else
+            {
+                emitByte(OP_NULL);
+            }
+            consume(TOKEN_COMMA, "Expect ',' after variable declaration.");
+            defineVariable(global);
+        }
+        else if (!match(TOKEN_COMMA))
         {
             expression();
+            consume(TOKEN_COMMA, "Expect ',' after initializer.");
         }
-        else
+
+        int loopStart = currentChunk()->count;
+
+        int exitJump = -1;
+        if (!match(TOKEN_COMMA))
         {
-            emitByte(OP_NULL);
+            expression();
+            consume(TOKEN_COMMA, "Expect ',' after loop condition.");
+
+            exitJump = emitJump(OP_JUMP_IF_FALSE);
+            emitByte(OP_POP); 
         }
-        consume(TOKEN_COMMA, "Expect ',' after variable declaration.");
-        defineVariable(global);
-    }
-    else if (!match(TOKEN_COMMA))
-    {
-        expression();
-        consume(TOKEN_COMMA, "Expect ',' after initializer.");
-    }
 
-    int loopStart = currentChunk()->count;
+        int bodyJump = emitJump(OP_JUMP);
+        int incrementStart = currentChunk()->count;
+        if (!match(TOKEN_COMMA))
+        {
+            expression();
+            emitByte(OP_POP);
+        }
 
-    // Condition
-    int exitJump = -1;
-    if (!match(TOKEN_COMMA))
-    {
-        expression();
-        consume(TOKEN_COMMA, "Expect ',' after loop condition.");
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
 
-        // Jump out of the loop if the condition is false.
-        exitJump = emitJump(OP_JUMP_IF_FALSE);
-        emitByte(OP_POP); // Pop the condition.
-    }
+        emitLoop(loopStart);
+        patchJump(bodyJump);
 
-    // Increment
-    int bodyJump = emitJump(OP_JUMP);
-    int incrementStart = currentChunk()->count;
-    if (!match(TOKEN_COMMA))
-    {
-        expression();
-        emitByte(OP_POP);
-    }
+        consume(TOKEN_LEFT_BRACE, "Expect '{' before loop body.");
+        block();
 
-    emitLoop(loopStart);
-    patchJump(bodyJump);
+        emitLoop(incrementStart);
 
-    // Body
-    consume(TOKEN_LEFT_BRACE, "Expect '{' before loop body.");
-    block();
+        if (exitJump != -1)
+        {
+            patchJump(exitJump);
+            emitByte(OP_POP);
+        }
+    } else {
 
-    // Jump back to increment
-    emitLoop(incrementStart);
+        if (match(TOKEN_THE))
+        {
+            uint8_t global = parseVariable("Expect variable name.");
+            if (match(TOKEN_EQUAL) || match(TOKEN_IS))
+            {
+                expression();
+            }
+            else
+            {
+                emitByte(OP_NULL);
+            }
+            consume(TOKEN_COMMA, "Expect ',' after variable declaration.");
+            defineVariable(global);
+        }
+        else if (!match(TOKEN_COMMA))
+        {
+            expression();
+            consume(TOKEN_COMMA, "Expect ',' after initializer.");
+        }
 
-    if (exitJump != -1)
-    {
-        patchJump(exitJump);
-        emitByte(OP_POP);
+        int loopStart = currentChunk()->count;
+
+        int exitJump = -1;
+        if (!match(TOKEN_COMMA))
+        {
+            expression();
+            consume(TOKEN_COMMA, "Expect ',' after loop condition.");
+
+            exitJump = emitJump(OP_JUMP_IF_FALSE);
+            emitByte(OP_POP); 
+        }
+
+        int bodyJump = emitJump(OP_JUMP);
+        int incrementStart = currentChunk()->count;
+        if (!match(TOKEN_COMMA))
+        {
+            expression();
+            emitByte(OP_POP);
+        }
+
+        emitLoop(loopStart);
+        patchJump(bodyJump);
+
+        consume(TOKEN_LEFT_BRACE, "Expect '{' before loop body.");
+        block();
+
+        emitLoop(incrementStart);
+
+        if (exitJump != -1)
+        {
+            patchJump(exitJump);
+            emitByte(OP_POP);
+        }
     }
 
     endScope();
