@@ -26,6 +26,7 @@ static void runtimeError(const char *format, ...)
 
     size_t instruction = vm.ip - vm.chunk->code - 1;
     int line = vm.chunk->lines[instruction];
+    (void)line;
 
     resetStack();
 }

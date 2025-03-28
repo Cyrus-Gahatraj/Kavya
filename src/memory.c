@@ -4,6 +4,7 @@
 
 void *reallocate(void *pointer, size_t oldSize, size_t newSize)
 {
+    (void)oldSize;
     if (newSize == 0)
     {
         free(pointer);

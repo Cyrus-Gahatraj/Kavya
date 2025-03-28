@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(kavya C)
 
-set(CMAKE_C_FLAGS "-g")
+set(CMAKE_C_FLAGS "-g -O2 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -march=native -flto -fstack-protector-strong -D_FORTIFY_SOURCE=2")
 
 # Add the include directory
 include_directories(include)

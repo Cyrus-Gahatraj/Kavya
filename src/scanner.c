@@ -175,6 +175,7 @@ static TokenType identifierType()
                 return checkKeyword(2, 0, "", TOKEN_IS);
             }
         }
+        break;
     case 'n':
         return checkKeyword(1, 3, "ull", TOKEN_NULL);
     case 'o':

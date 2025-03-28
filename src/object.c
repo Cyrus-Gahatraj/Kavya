@@ -41,6 +41,8 @@ static uint32_t hashString(const char *key, int length)
         hash ^= key[i];
         hash *= 1677619;
     }
+
+    return hash;
 }
 
 ObjString *takeString(char *chars, int length)

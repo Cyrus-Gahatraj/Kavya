@@ -244,9 +244,8 @@ static void declaration();
 static ParseRule *getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 
-static void binary(bool canAssign)
+static void binary(bool canAssign __attribute__((unused)))
 {
-
     TokenType operatorType = parser.previous.type;
 
     ParseRule *rule = getRule(operatorType);
@@ -285,10 +284,12 @@ static void binary(bool canAssign)
     case TOKEN_SLASH:
         emitByte(OP_DIVIDE);
         break;
+    default:
+        return; // Unhandled token types
     }
 }
 
-static void literal(bool canAssign)
+static void literal(bool canAssign __attribute__((unused)))
 {
     switch (parser.previous.type)
     {
@@ -306,19 +307,19 @@ static void literal(bool canAssign)
     }
 }
 
-static void grouping(bool canAssign)
+static void grouping(bool canAssign __attribute__((unused)))
 {
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression");
 }
 
-static void number(bool canAssign)
+static void number(bool canAssign __attribute__((unused)))
 {
     double value = strtod(parser.previous.start, NULL);
     emitConstant(NUMBER_VAL(value));
 }
 
-static void and_(bool canAssign)
+static void and_(bool canAssign __attribute__((unused)))
 {
     int endJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);
@@ -326,7 +327,7 @@ static void and_(bool canAssign)
     patchJump(endJump);
 }
 
-static void or_(bool canAssign)
+static void or_(bool canAssign __attribute__((unused)))
 {
     int elseJump = emitJump(OP_JUMP_IF_FALSE);
     int endJump = emitJump(OP_JUMP);
@@ -336,13 +337,13 @@ static void or_(bool canAssign)
     patchJump(endJump);
 }
 
-static void string(bool canAssign)
+static void string(bool canAssign __attribute__((unused)))
 {
     emitConstant(OBJ_VAL(copyString(parser.previous.start + 1,
                                     parser.previous.length - 2)));
 }
 
-static void askExpression(bool canAssign)
+static void askExpression(bool canAssign __attribute__((unused)))
 {
     consume(TOKEN_STRING, "Expect string after 'ask'.");
     emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
@@ -444,7 +445,7 @@ static void variable(bool canAssign)
     namedVariable(parser.previous, canAssign);
 }
 
-static void unary(bool canAssign)
+static void unary(bool canAssign __attribute__((unused)))
 {
     TokenType operatorType = parser.previous.type;
 
