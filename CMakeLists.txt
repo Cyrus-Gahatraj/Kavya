@@ -4,11 +4,18 @@ project(kavya C)
 
 set(CMAKE_C_FLAGS "-g -O2 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -march=native -flto -fstack-protector-strong -D_FORTIFY_SOURCE=2")
 
+# Find Flex package
+find_package(FLEX REQUIRED)
+
 # Add the include directory
 include_directories(include)
 
+# Generate lexer
+flex_target(kavya_lexer src/lex/lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lex.yy.c)
+
+# Add the lexer source to the sources list
 file(GLOB SOURCES "src/*.c")
-add_executable(kavya ${SOURCES})
+add_executable(kavya ${SOURCES} ${FLEX_kavya_lexer_OUTPUTS})
 
 # Install the binary as 'kavya'
 install(TARGETS kavya DESTINATION /usr/local/bin)
