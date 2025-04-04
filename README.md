@@ -22,6 +22,7 @@ However, we can compile the code from source with the help of some tools.
 
 * **GCC (C compiler):** Required for compiling the C source code.
 * **CMake:** Used for building the project.
+* **Flex:** Used for lexical analysis.
 
 ## Building Kavya from Source
 
